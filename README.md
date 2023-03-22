@@ -46,3 +46,11 @@ task-a   Check Rust capabilities
 task-b   Check JavaScript capabilities
 task-c
 ```
+
+```
+$ btv --tags
+dependency
+js
+play
+rust
+```

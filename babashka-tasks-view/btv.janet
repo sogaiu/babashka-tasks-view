@@ -107,10 +107,18 @@
     (print "Invoke in a directory that contains a bb.edn file.")
     (os/exit 0))
 
+  # XXX: improve args handling
+  (def show-tags
+    (when (> (length argv) 1)
+      (= "--tags" (get argv 1))))
+
   # XXX: only one tag at a time for the moment
   (def tag
     (when (> (length argv) 1)
-      (get argv 1)))
+      (let [cand (get argv 1)]
+        (if (= "--tags" cand)
+          nil
+          cand))))
 
   (def bb-edn
     (slurp "bb.edn"))
@@ -202,6 +210,19 @@
          task-values))
 
   #(printf "tags: %M" task-tags)
+
+  (when show-tags
+    (def all-tags
+      (reduce (fn [acc tags]
+                (when tags
+                  (each tag tags
+                    (put acc tag true)))
+                acc)
+              @{}
+              task-tags))
+    (each tag (sort (keys all-tags))
+      (print (string/slice tag 1)))
+    (os/exit 0))
 
   (def longest-name-length
     (max ;(map length task-names)))
