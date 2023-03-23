@@ -2,9 +2,33 @@
 (import ../janet-zipper/zipper :as c)
 (import ./loc-cipper :as c)
 
+(def usage
+  ``
+  Usage: btv [options]
+         btv <tag>
+  View Babashka tasks by tag.
+
+    --help    show this output
+    --tags    show all tags
+    --tasks   show all tasks
+
+  With no arguments, shows all tags with all associated tasks.
+
+  Invoke in a directory that contains a bb.edn file.
+  ``)
+
 (defn has-bb-edn?
   []
   (os/stat "bb.edn"))
+
+(defn drop-comments-and-discards
+  [a-node]
+  (filter |(not (match $
+                  [:comment]
+                  true
+                  [:discard]
+                  true))
+          a-node))
 
 (comment
 
@@ -26,7 +50,10 @@
               :task check-js-bits/-main}
              task-c
              {:_tags [:play]
-              :task fun/-main}}}
+              :task fun/-main}
+             #_ #_ task-d
+             {:_tags [:dull]
+              :task work/-main}}}
     ``)
 
   (def zloc
@@ -51,13 +78,17 @@
                       [:map]
                       true)))
 
-  (-> tasks-map-zloc
-      c/node
-      l/gen)
+  (def filtered-tasks-map-node
+    (drop-comments-and-discards (c/node tasks-map-zloc)))
+
+  (def tasks-as-jdn
+    (l/gen (array/insert filtered-tasks-map-node 0 :code)))
+
+  tasks-as-jdn
   # =>
-  (string "{:requires ([babashka.fs :as fs]\n"
+  (string ":requires ([babashka.fs :as fs]\n"
           "                    [conf :as cnf])\n"
-          "         ;; underlying bits\n"
+          "         \n"
           "         task-a\n"
           "         {:doc \"Check Rust capabilities\"\n"
           "          :_tags [:rust :dependency]\n"
@@ -68,73 +99,15 @@
           "          :task check-js-bits/-main}\n"
           "         task-c\n"
           "         {:_tags [:play]\n"
-          "          :task fun/-main}}")
+          "          :task fun/-main}\n"
+          "         ")
 
   )
 
-(defn drop-non-forms
-  [a-node]
-  (filter |(not (match $
-                  [:whitespace]
-                  true
-                  [:comment]
-                  true
-                  [:discard]
-                  true))
-          a-node))
-
-(comment
-
-  (drop-non-forms
-    [:map @{}
-     [:keyword @{} ""] [:whitespace " "]
-     [:number @{} "1"]])
-  # =>
-  '@[:map @{}
-     (:keyword @{} "")
-     (:number @{} "1")]
-
-  )
-
-(def usage
-  ``
-  Usage: btv [options]
-         btv tag
-  View Babashka tasks by tag.
-
-    --help    show this output
-    --tags    show all tags
-
-  Invoke in a directory that contains a bb.edn file.
-  ``)
-
-(defn main
-  [& argv]
-
-  (when (or (not (has-bb-edn?))
-            (when-let [arg (get argv 1)]
-              (= "--help" arg)))
-    (print usage)
-    (os/exit 0))
-
-  # XXX: improve args handling
-  (def show-tags
-    (when (> (length argv) 1)
-      (= "--tags" (get argv 1))))
-
-  # XXX: only one tag at a time for the moment
-  (def tag
-    (when (> (length argv) 1)
-      (let [cand (get argv 1)]
-        (if (= "--tags" cand)
-          nil
-          cand))))
-
-  (def bb-edn
-    (slurp "bb.edn"))
-
+(defn bb-edn-to-tasks-jdn
+  [src]
   (def zloc
-    (-> (l/par bb-edn)
+    (-> (l/par src)
         c/zip-down))
 
   (def first-map-zloc
@@ -156,114 +129,215 @@
                       true)))
 
   (def filtered-tasks-map-node
-    (drop-non-forms (c/node tasks-map-zloc)))
+    (drop-comments-and-discards (c/node tasks-map-zloc)))
 
-  (def task-names
-    (->> # drop :map and @{} from beginning
-         (drop 2 filtered-tasks-map-node)
-         # pair up nodes
-         (partition 2)
-         # just keep the first of the pair
-         (map first)
-         # retain only symbol names
-         (keep |(match $
-                  [:symbol _ value]
-                    value))))
+  (l/gen (array/insert filtered-tasks-map-node 0 :code)))
 
-  (def task-values
-    (as-> (drop 2 filtered-tasks-map-node) x
-          # pair up nodes
-          (partition 2 x)
-          # only keep the associated values of symbol keys
-          (keep (fn [pair]
-                  (let [k (first pair)]
-                    (when (= :symbol (first k))
-                      (get pair 1))))
-                x)))
+(comment
 
-  (def task-docs
-    (map (fn [map-node]
-           (->> # drop :map and @{} from beginning
-                (drop 2 map-node)
-                # drop the non-form nodes
-                drop-non-forms
-                # pair up nodes
-                (partition 2)
-                # get :doc node's associated string value if any
-                (keep (fn [[k-node v-node]]
-                        (let [[node-type _ node-value] k-node]
-                          (when (and (= :keyword node-type)
-                                     (= ":doc" node-value))
-                            (get v-node 2)))))
-                first))
-         task-values))
+  (def sample-src
+    ``
+    {:min-bb-version "0.4.0"
+     :paths ["conf"
+             "script"]
+     :tasks {:requires ([babashka.fs :as fs]
+                        [conf :as cnf])
+             ;; underlying bits
+             task-a
+             {:doc "Check Rust capabilities"
+              :_tags [:rust :dependency]
+              :task check-rust-bits/-main}
+             task-b
+             {:doc "Check JavaScript capabilities"
+              :_tags [:js :dependency]
+              :task check-js-bits/-main}
+             task-c
+             {:_tags [:play]
+              :task fun/-main}
+             #_ #_ task-d
+             {:_tags [:dull]
+              :task work/-main}}}
+    ``)
 
-  #(printf "docs: %M" task-docs)
+  (bb-edn-to-tasks-jdn sample-src)
+  # =>
+  (string ":requires ([babashka.fs :as fs]\n"
+          "                    [conf :as cnf])\n"
+          "         \n"
+          "         task-a\n"
+          "         {:doc \"Check Rust capabilities\"\n"
+          "          :_tags [:rust :dependency]\n"
+          "          :task check-rust-bits/-main}\n"
+          "         task-b\n"
+          "         {:doc \"Check JavaScript capabilities\"\n"
+          "          :_tags [:js :dependency]\n"
+          "          :task check-js-bits/-main}\n"
+          "         task-c\n"
+          "         {:_tags [:play]\n"
+          "          :task fun/-main}\n"
+          "         ")
 
-  (def task-tags
-    (map (fn [map-node]
-           (->> # drop :map and @{} from beginning
-                (drop 2 map-node)
-                # drop the non-form nodes
-                drop-non-forms
-                # pair up nodes
-                (partition 2)
-                # get :_tags node's values if any
-                (keep (fn [[k-node v-node]]
-                        (let [[node-type _ node-value] k-node]
-                          (when (and (= :keyword node-type)
-                                     (= ":_tags" node-value))
-                            (->> (drop 2 v-node)
-                                 drop-non-forms
-                                 (map |(get $ 2)))))))
-                first))
-         task-values))
+  )
 
-  #(printf "tags: %M" task-tags)
+(defn find-all-tags
+  [task-names-and-tags]
+  (->> (values task-names-and-tags)
+               flatten
+               distinct
+               sort))
 
-  (when show-tags
-    (def all-tags
-      (reduce (fn [acc tags]
-                (when tags
-                  (each tag tags
-                    (put acc tag true)))
-                acc)
-              @{}
-              task-tags))
-    (each tag (sort (keys all-tags))
-      (print (string/slice tag 1)))
-    (os/exit 0))
-
+(defn print-tasks-with-doc
+  [tasks-jdn tag]
+  # XXX: should this always be over all task names or only those
+  #      that "match"?
   (def longest-name-length
-    (max ;(map length task-names)))
+    (->> (keys tasks-jdn)
+         (map length)
+         splice
+         max))
 
   (def min-spaces 3)
 
-  (def tag-str
+  (def tag-kwd
     (when tag
-      (string ":" tag)))
+      (keyword tag)))
 
-  (for i 0 (length task-names)
-    (def name
-      (get task-names i))
-
+  (each name (sort (keys tasks-jdn))
     (def tags
-      (get task-tags i))
+      (get-in tasks-jdn [name :_tags]))
 
     (when (or (nil? tag)
               (and tags
-                   (find |(= tag-str $) tags)))
+                   (find |(= tag-kwd $) tags)))
       (def name-len
         (length name))
       (def doc
-        (let [doc-str (get task-docs i "")]
-          (if (pos? (length doc-str))
-            (string/slice doc-str 1 -2)
-            doc-str)))
+        (get-in tasks-jdn [name :doc]))
       (def spacer
         (string/repeat " "
                        (- (+ longest-name-length min-spaces)
                           name-len)))
-      (printf "%s%s%s" name spacer doc)))
+      (printf "%s%s%s" name spacer doc))))
+
+(comment
+
+  (def sample-src
+    ``
+    {:min-bb-version "0.4.0"
+     :paths ["conf"
+             "script"]
+     :tasks {:requires ([babashka.fs :as fs]
+                        [conf :as cnf])
+             ;; underlying bits
+             task-a
+             {:doc "Check Rust capabilities"
+              :_tags [:rust :dependency]
+              :task check-rust-bits/-main}
+             task-b
+             {:doc "Check JavaScript capabilities"
+              :_tags [:js :dependency]
+              :task check-js-bits/-main}
+             task-c
+             {:_tags [:play]
+              :task fun/-main}
+             #_ #_ task-d
+             {:_tags [:dull]
+              :task work/-main}}}
+    ``)
+
+  (def tasks-jdn
+    (bb-edn-to-tasks-jdn sample-src))
+
+  (def tweaked-tj
+    (string "{" tasks-jdn "}"))
+
+  (parse tweaked-tj)
+  # =>
+  '{task-a
+    {:_tags [:rust :dependency]
+     :doc "Check Rust capabilities"
+     :task check-rust-bits/-main}
+    task-b
+    {:_tags [:js :dependency]
+     :doc "Check JavaScript capabilities"
+     :task check-js-bits/-main}
+    task-c
+    {:_tags [:play]
+     :task fun/-main}
+    :requires
+    ([babashka.fs :as fs] [conf :as cnf])}
 
   )
+
+(defn main
+  [& argv]
+
+  # XXX: improve args handling
+  (when (or (not (has-bb-edn?))
+            (when-let [arg (get argv 1)]
+              (= "--help" arg)))
+    (print usage)
+    (os/exit 0))
+
+  (def show-tags
+    (when (> (length argv) 1)
+      (= "--tags" (get argv 1))))
+
+  (def show-tasks
+    (when (> (length argv) 1)
+      (= "--tasks" (get argv 1))))
+
+  # XXX: only one tag at a time for the moment
+  (def tag
+    (when (> (length argv) 1)
+      (let [cand (get argv 1)]
+        (if (or (= "--tags" cand)
+                (= "--tasks" cand))
+          nil
+          cand))))
+
+  (def bb-edn
+    (slurp "bb.edn"))
+
+  (def tasks-jdn
+    (bb-edn-to-tasks-jdn bb-edn))
+
+  (def tweaked-tj
+    (string "{" tasks-jdn "}"))
+
+  (def tj
+    (try
+      (parse tweaked-tj)
+      ([_]
+        (eprint "Failed to parse bb.edn tasks")
+        (os/exit 1))))
+
+  (def task-names-and-tags
+    (->> tj
+         pairs
+         (keep (fn [[k v]]
+                 (when (symbol? k)
+                   [k (v :_tags)])))
+         from-pairs))
+
+  (cond
+    show-tasks
+    (each name (sort (keys tj))
+      (when (symbol? name)
+        (print name)))
+    #
+    show-tags
+    (each a-tag (sort (find-all-tags task-names-and-tags))
+      (print a-tag))
+    #
+    tag
+    (print-tasks-with-doc tj tag)
+    #
+    (each a-tag (find-all-tags task-names-and-tags)
+      (print a-tag)
+      (each task (sort (keys task-names-and-tags))
+        (when (find |(= a-tag $)
+                    (get task-names-and-tags task))
+          (print "  " task)))
+      (print))))
+

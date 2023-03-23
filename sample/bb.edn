@@ -1,8 +1,3 @@
-# babashka-tasks-view (btv)
-
-Suppose the content of a `bb.edn` is:
-
-```edn
 {:min-bb-version "0.4.0"
  :paths ["conf"
          "script"]
@@ -20,54 +15,3 @@ Suppose the content of a `bb.edn` is:
          task-c
          {:_tags [:play]
           :task fun/-main}}}
-```
-
-With `btv`, one can do:
-
-```
-$ btv --tags
-dependency
-js
-play
-rust
-```
-
-```
-$ btv rust
-task-a   Check Rust capabilities
-```
-
-```
-$ btv js
-task-b   Check JavaScript capabilities
-```
-
-```
-$ btv dependency
-task-a   Check Rust capabilities
-task-b   Check JavaScript capabilities
-```
-
-```
-$ btv --tasks
-task-a
-task-b
-task-c
-```
-
-```
-$ btv
-dependency
-  task-a
-  task-b
-
-js
-  task-b
-
-play
-  task-c
-
-rust
-  task-a
-```
-
