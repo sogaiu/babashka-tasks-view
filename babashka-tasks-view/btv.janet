@@ -96,15 +96,25 @@
 
   )
 
+(def usage
+  ``
+  Usage: btv [options]
+         btv tag
+  View Babashka tasks by tag.
+
+    --help    show this output
+    --tags    show all tags
+
+  Invoke in a directory that contains a bb.edn file.
+  ``)
+
 (defn main
   [& argv]
 
   (when (or (not (has-bb-edn?))
             (when-let [arg (get argv 1)]
               (= "--help" arg)))
-    (print "btv - view babashka tasks by tag")
-    (print)
-    (print "Invoke in a directory that contains a bb.edn file.")
+    (print usage)
     (os/exit 0))
 
   # XXX: improve args handling
