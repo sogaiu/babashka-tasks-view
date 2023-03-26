@@ -4,8 +4,8 @@
 
 (def usage
   ``
-  Usage: btv [options]
-         btv <tag>
+  Usage: bbtv [options]
+         bbtv <tag>
   View Babashka tasks by tag.
 
     --help    show this output

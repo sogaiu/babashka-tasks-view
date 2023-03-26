@@ -4,7 +4,7 @@
   :repo "git+https://github.com/sogaiu/babashka-tasks-view.git")
 
 (declare-executable
-  :name "btv"
-  :entry "babashka-tasks-view/btv.janet"
+  :name "bbtv"
+  :entry "babashka-tasks-view/bbtv.janet"
   :install true)
 

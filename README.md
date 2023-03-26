@@ -1,4 +1,4 @@
-# babashka-tasks-view (btv)
+# babashka-tasks-view (bbtv)
 
 Suppose the content of a `bb.edn` is:
 
@@ -22,10 +22,10 @@ Suppose the content of a `bb.edn` is:
           :task fun/-main}}}
 ```
 
-With `btv`, one can do:
+With `bbtv`, one can do:
 
 ```
-$ btv --tags
+$ bbtv --tags
 dependency
 js
 play
@@ -33,30 +33,30 @@ rust
 ```
 
 ```
-$ btv rust
+$ bbtv rust
 task-a   Check Rust capabilities
 ```
 
 ```
-$ btv js
+$ bbtv js
 task-b   Check JavaScript capabilities
 ```
 
 ```
-$ btv dependency
+$ bbtv dependency
 task-a   Check Rust capabilities
 task-b   Check JavaScript capabilities
 ```
 
 ```
-$ btv --tasks
+$ bbtv --tasks
 task-a
 task-b
 task-c
 ```
 
 ```
-$ btv
+$ bbtv
 dependency
   task-a
   task-b
