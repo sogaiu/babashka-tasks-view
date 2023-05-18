@@ -211,13 +211,13 @@
                    (find |(= tag-kwd $) tags)))
       (def name-len
         (length name))
-      (def doc
+      (def doc-str
         (get-in tasks-jdn [name :doc]))
       (def spacer
         (string/repeat " "
                        (- (+ longest-name-length min-spaces)
                           name-len)))
-      (printf "%s%s%s" name spacer doc))))
+      (printf "%s%s%s" name spacer doc-str))))
 
 (comment
 
