@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/sogaiu/clojure-peg
+	branch = master
+	commit = edb96aa7e752080d6e1fd75ac28f3bd7163c7d35
+	parent = fef586106a53f732932672e96d9c9e24c7508cd7
+	method = merge
+	cmdver = 0.4.9
