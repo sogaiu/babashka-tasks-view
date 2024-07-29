@@ -1,5 +1,5 @@
-(import ../clojure-peg/location :as l)
-(import ../janet-zipper/zipper :as c)
+(import ./clojure-peg/clojure-peg/location :as l)
+(import ./janet-zipper/janet-zipper/zipper :as c)
 (import ./loc-cipper :as c)
 
 (def usage

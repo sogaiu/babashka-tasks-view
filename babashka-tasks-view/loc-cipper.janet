@@ -1,4 +1,4 @@
-(import ../janet-zipper/zipper :as z)
+(import ./janet-zipper/janet-zipper/zipper :as z)
 
 (defn has-children?
   ``
@@ -102,7 +102,7 @@
 
 (comment
 
-  (import ../clojure-peg/location :as l)
+  (import ./clojure-peg/clojure-peg/location :as l)
 
   (-> (l/par "(+ 1 3)")
       zip
@@ -124,7 +124,7 @@
 
 (comment
 
-  #(import ../clojure-peg/location :as l)
+  #(import ./clojure-peg/clojure-peg/location :as l)
 
   (-> (l/par "(+ 1 3)")
       zip-down
@@ -168,7 +168,7 @@
 
 (comment
 
-  #(import ../clojure-peg/location :as l)
+  #(import ./clojure-peg/clojure-peg/location :as l)
 
   (def src
     ``
@@ -215,7 +215,7 @@
 
 (comment
 
-  #(import ../clojure-peg/location :as l)
+  #(import ./clojure-peg/clojure-peg/location :as l)
 
   (-> (l/par
         ``
