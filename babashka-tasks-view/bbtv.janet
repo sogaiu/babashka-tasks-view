@@ -33,28 +33,26 @@
 (comment
 
   (def sample-src
-    ``
-    {:min-bb-version "0.4.0"
-     :paths ["conf"
-             "script"]
-     :tasks {:requires ([babashka.fs :as fs]
-                        [conf :as cnf])
-             ;; underlying bits
-             task-a
-             {:doc "Check Rust capabilities"
-              :_tags [:rust :dependency]
-              :task check-rust-bits/-main}
-             task-b
-             {:doc "Check JavaScript capabilities"
-              :_tags [:js :dependency]
-              :task check-js-bits/-main}
-             task-c
-             {:_tags [:play]
-              :task fun/-main}
-             #_ #_ task-d
-             {:_tags [:dull]
-              :task work/-main}}}
-    ``)
+    (string `{:min-bb-version "0.4.0"` "\n"
+            ` :paths ["conf"` "\n"
+            `         "script"]` "\n"
+            ` :tasks {:requires ([babashka.fs :as fs]` "\n"
+            `                    [conf :as cnf])` "\n"
+            `         ;; underlying bits` "\n"
+            `         task-a` "\n"
+            `         {:doc "Check Rust capabilities"` "\n"
+            `          :_tags [:rust :dependency]` "\n"
+            `          :task check-rust-bits/-main}` "\n"
+            `         task-b` "\n"
+            `         {:doc "Check JavaScript capabilities"` "\n"
+            `          :_tags [:js :dependency]` "\n"
+            `          :task check-js-bits/-main}` "\n"
+            `         task-c` "\n"
+            `         {:_tags [:play]` "\n"
+            `          :task fun/-main}` "\n"
+            `         #_ #_ task-d` "\n"
+            `         {:_tags [:dull]` "\n"
+            `          :task work/-main}}}`))
 
   (def zloc
     (-> (l/par sample-src)
@@ -136,28 +134,26 @@
 (comment
 
   (def sample-src
-    ``
-    {:min-bb-version "0.4.0"
-     :paths ["conf"
-             "script"]
-     :tasks {:requires ([babashka.fs :as fs]
-                        [conf :as cnf])
-             ;; underlying bits
-             task-a
-             {:doc "Check Rust capabilities"
-              :_tags [:rust :dependency]
-              :task check-rust-bits/-main}
-             task-b
-             {:doc "Check JavaScript capabilities"
-              :_tags [:js :dependency]
-              :task check-js-bits/-main}
-             task-c
-             {:_tags [:play]
-              :task fun/-main}
-             #_ #_ task-d
-             {:_tags [:dull]
-              :task work/-main}}}
-    ``)
+    (string `{:min-bb-version "0.4.0"` "\n"
+            ` :paths ["conf"` "\n"
+            `         "script"]` "\n"
+            ` :tasks {:requires ([babashka.fs :as fs]` "\n"
+            `                    [conf :as cnf])` "\n"
+            `         ;; underlying bits` "\n"
+            `         task-a` "\n"
+            `         {:doc "Check Rust capabilities"` "\n"
+            `          :_tags [:rust :dependency]` "\n"
+            `          :task check-rust-bits/-main}` "\n"
+            `         task-b` "\n"
+            `         {:doc "Check JavaScript capabilities"` "\n"
+            `          :_tags [:js :dependency]` "\n"
+            `          :task check-js-bits/-main}` "\n"
+            `         task-c` "\n"
+            `         {:_tags [:play]` "\n"
+            `          :task fun/-main}` "\n"
+            `         #_ #_ task-d` "\n"
+            `         {:_tags [:dull]` "\n"
+            `          :task work/-main}}}`))
 
   (bb-edn-to-tasks-jdn sample-src)
   # =>
