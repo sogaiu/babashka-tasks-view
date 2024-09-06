@@ -171,11 +171,9 @@
   #(import ./clojure-peg/clojure-peg/location :as l)
 
   (def src
-    ``
-    (; hi there
-    + 1 2)
-    ``)
-  
+    (string "(; hi there\n"
+            "+ 1 2)"))
+
   (-> (l/par src)
       zip-down
       z/down
@@ -217,11 +215,8 @@
 
   #(import ./clojure-peg/clojure-peg/location :as l)
 
-  (-> (l/par
-        ``
-        (; hi there
-        + 1 2)
-        ``)
+  (-> (l/par (string "(; hi there\n"
+                     "+ 1 2)"))
       zip-down
       z/down
       right-skip-wsc
