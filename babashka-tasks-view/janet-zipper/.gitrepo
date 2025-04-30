@@ -6,7 +6,7 @@
 [subrepo]
 	remote = ~/src/janet-zipper
 	branch = master
-	commit = 4cf38b52187b82018cf58db42525c2849fa96ed4
-	parent = 547a1537041f66d3e22759ea63224317f96adf41
+	commit = bd6ee51446daadf3c344a3ee7cbb45248ab200eb
+	parent = 6efdf10c53ca430184912280ea95a28ca16f4a98
 	method = merge
 	cmdver = 0.4.9
