@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/sogaiu/clojure-peg
 	branch = master
-	commit = 66448b0553609b3d4fc98706bfd51ec9f6b13f2c
-	parent = 0b52d3147e7248f7deee42fca4b93374aaf95853
+	commit = 5e8cb7795ab896a50b5b715dc62f838ffff94d92
+	parent = 0ca40bd5486e7f152c1242a3229432767d90e717
 	method = merge
 	cmdver = 0.4.9
